@@ -58,19 +58,15 @@ class Gelu(Layer):
 	def __init__(self, name):
 		super(Gelu, self).__init__(name)
 
-    def forward(self, input):
-        # TODO START
-        '''Your codes here'''
-        u = input + 0.044715*(input**3)
+	def forward(self, input):
+		u = input + 0.044715*(input**3)
         
         # TODO END
 
-    def backward(self, grad_output):
+	def backward(self, grad_output):
         # TODO START
-        '''Your codes here'''
-        pass
+		pass
         # TODO END
-
 class Linear(Layer):
     def __init__(self, name, in_num, out_num, init_std):
         super(Linear, self).__init__(name, trainable=True)
