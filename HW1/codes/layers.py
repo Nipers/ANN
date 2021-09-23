@@ -44,14 +44,14 @@ class Sigmoid(Layer):
 
     def forward(self, input):
         # TODO START
-        '''Your codes here'''
-        pass
+        self._saved_tensor = input
+        return 1 / (1 + np.exp(-input))
         # TODO END
 
     def backward(self, grad_output):
         # TODO START
-        '''Your codes here'''
-        pass
+        sig = self.backward(self._saved_tensor)
+        return grad_output * sig * (1 - sig)
         # TODO END
 
 class Gelu(Layer):
