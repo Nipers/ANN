@@ -50,7 +50,7 @@ class Sigmoid(Layer):
 
     def backward(self, grad_output):
         # TODO START
-        sig = self.backward(self._saved_tensor)
+        sig = self.forward(self._saved_tensor)
         return grad_output * sig * (1 - sig)
         # TODO END
 
@@ -59,14 +59,18 @@ class Gelu(Layer):
 		super(Gelu, self).__init__(name)
 
 	def forward(self, input):
-		u = input + 0.044715*(input**3)
-        
+		self._saved_tensor = input
+		u = np.power(2/np.pi, 0.5) * (input + 0.044715*(np.power(input, 3)))
+		return 0.5 * input *(1 + np.tanh(u))
         # TODO END
 
 	def backward(self, grad_output):
-        # TODO START
-		pass
-        # TODO END
+		x = np.power(self._saved_tensor, 3)
+		a = 0.0356774 * x + 0.797885 * self._saved_tensor
+		b = 0.0535161 * x + 0.398942 * self._saved_tensor
+		sec = 2 / (np.exp(a) + np.exp(-a))
+		return grad_output * (0.5 * np.tanh(a) + b * np.power(sec, 2) + 0.5) 
+
 class Linear(Layer):
     def __init__(self, name, in_num, out_num, init_std):
         super(Linear, self).__init__(name, trainable=True)
