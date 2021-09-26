@@ -95,7 +95,9 @@ class Linear(Layer):
     def backward(self, grad_output):
         # TODO START
         '''Your codes here'''
-        pass
+        self.grad_b = grad_output
+        self.grad_W = (self._saved_tensor @ grad_output)
+        return grad_output @ self.W.T
         # TODO END
 
     def update(self, config):

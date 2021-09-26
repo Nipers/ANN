@@ -9,13 +9,13 @@ class EuclideanLoss(object):
     def forward(self, input, target):
         # TODO START
         '''Your codes here'''
-        pass
+        diff = target - input
+        return np.mean(diff**2, axis=0).sum() / 2
         # TODO END
 
     def backward(self, input, target):
 		# TODO START
-        '''Your codes here'''
-        pass
+        return target - input
 		# TODO END
 
 
@@ -25,15 +25,17 @@ class SoftmaxCrossEntropyLoss(object):
 
     def forward(self, input, target):
         # TODO START
-        '''Your codes here'''
-        pass
+        return -np.mean(np.log(self.softmax(input))*target)
         # TODO END
 
     def backward(self, input, target):
         # TODO START
-        '''Your codes here'''
-        pass
+        return target - input
         # TODO END
+    def softmax(self, x):
+        x -= np.max(x)
+        exp = np.exp(x)
+        return exp / np.expand_dims(np.sum(exp, axis=1),-1)
 
 
 class HingeLoss(object):
@@ -43,13 +45,12 @@ class HingeLoss(object):
 
 	def forward(self, input, target):
         # TODO START
-        '''Your codes here'''
-        pass
+		pass
         # TODO END
 
 	def backward(self, input, target):
         # TODO START
-        '''Your codes here'''
+		'''Your codes here'''
         pass
         # TODO END
 
