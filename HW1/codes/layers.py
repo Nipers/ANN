@@ -96,7 +96,7 @@ class Linear(Layer):
         # TODO START
         '''Your codes here'''
         self.grad_b = grad_output
-        self.grad_W = (self._saved_tensor @ grad_output)
+        self.grad_W = (self._saved_tensor.T @ grad_output) / grad_output.shape[0]
         return grad_output @ self.W.T
         # TODO END
 

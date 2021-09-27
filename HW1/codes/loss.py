@@ -9,8 +9,8 @@ class EuclideanLoss(object):
     def forward(self, input, target):
         # TODO START
         '''Your codes here'''
-        diff = target - input
-        return np.mean(diff**2, axis=0).sum() / 2
+        diff = np.linalg.norm(target - input, axis = 1)
+        return np.sum(diff**2) / 2
         # TODO END
 
     def backward(self, input, target):
@@ -45,12 +45,12 @@ class HingeLoss(object):
 
 	def forward(self, input, target):
         # TODO START
-		pass
+		return np.mean(np.sum((target == 0)* np.maximum(0, self.margin - input[target == 1].reshape(-1, 1) + input), axis=1))
         # TODO END
 
 	def backward(self, input, target):
         # TODO START
 		'''Your codes here'''
-        pass
+		pass
         # TODO END
 
