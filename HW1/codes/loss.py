@@ -1,5 +1,6 @@
 from __future__ import division
 import numpy as np
+from numpy.lib.function_base import diff
 
 
 class EuclideanLoss(object):
@@ -8,15 +9,13 @@ class EuclideanLoss(object):
 
     def forward(self, input, target):
         # TODO START
-        '''Your codes here'''
-        diff = np.linalg.norm(target - input, axis = 1)
-        return np.sum(diff**2) / 2
-        # TODO END
+        normed_diff = np.linalg.norm(target - input, axis = 1)
+        return (np.power(normed_diff, 2)).mean(axis=0).sum() / 2.0
 
     def backward(self, input, target):
-		# TODO START
-        return target - input
-		# TODO END
+        # TODO START
+        return input - target
+        # TODO END
 
 
 class SoftmaxCrossEntropyLoss(object):
@@ -30,7 +29,7 @@ class SoftmaxCrossEntropyLoss(object):
 
     def backward(self, input, target):
         # TODO START
-        return target - input
+        return input - target
         # TODO END
     def softmax(self, x):
         x -= np.max(x)

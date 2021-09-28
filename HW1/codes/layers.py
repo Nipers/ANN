@@ -104,7 +104,6 @@ class Linear(Layer):
         mm = config['momentum']
         lr = config['learning_rate']
         wd = config['weight_decay']
-
         self.diff_W = mm * self.diff_W + (self.grad_W + wd * self.W)
         self.W = self.W - lr * self.diff_W
 
