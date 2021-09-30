@@ -14,27 +14,32 @@ class EuclideanLoss(object):
 
     def backward(self, input, target):
         # TODO START
-        return input - target
+        return target - input
+        # return (target - input) / input.shape[0]
         # TODO END
+    def __str__(self) -> str:
+        return "E"
 
 
 class SoftmaxCrossEntropyLoss(object):
     def __init__(self, name):
         self.name = name
+        self.loss = np.zeros(1, dtype="f")
 
     def forward(self, input, target):
         # TODO START
-        return -np.mean(np.log(self.softmax(input))*target)
+        exp = np.exp(input - np.max(input))
+        self.soft = exp / np.expand_dims(np.sum(exp, 1),-1)
+        return -np.mean(np.log(self.soft) * target)
         # TODO END
 
     def backward(self, input, target):
-        # TODO START
-        return input - target
+		# TODO START
+        return target - self.soft
+		# return (target - input) / input.shape[0]
         # TODO END
-    def softmax(self, x):
-        x -= np.max(x)
-        exp = np.exp(x)
-        return exp / np.expand_dims(np.sum(exp, axis=1),-1)
+    def __str__(self) -> str:
+        return "S"
 
 
 class HingeLoss(object):
@@ -44,12 +49,18 @@ class HingeLoss(object):
 
 	def forward(self, input, target):
         # TODO START
-		return np.mean(np.sum((target == 0)* np.maximum(0, self.margin - input[target == 1].reshape(-1, 1) + input), axis=1))
+		return np.mean(np.sum((target == 0) * np.maximum(0, self.margin - input[target == 1].reshape(-1, 1) + input), axis=1))
         # TODO END
 
 	def backward(self, input, target):
         # TODO START
 		'''Your codes here'''
-		pass
+		grad = np.zeros_like(input)
+		grad[(target == 0) & (self.margin - input[target == 1].reshape(-1, 1) + input > 0)] = -1
+		grad[(target == 1)] = -np.sum(grad, axis=1)
+		return grad
+		# return grad / input.shape[0]
         # TODO END
 
+	def __str__(self) -> str:
+		return "H"

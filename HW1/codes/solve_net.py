@@ -17,6 +17,8 @@ def train_net(model, loss, config, inputs, labels, batch_size, disp_freq):
     iter_counter = 0
     loss_list = []
     acc_list = []
+    l1 = []
+    l2 = []
 
     for input, label in data_iterator(inputs, labels, batch_size):
         target = onehot_encoding(label, 10)
@@ -40,9 +42,12 @@ def train_net(model, loss, config, inputs, labels, batch_size, disp_freq):
 
         if iter_counter % disp_freq == 0:
             msg = '  Training iter %d, batch loss %.4f, batch acc %.4f' % (iter_counter, np.mean(loss_list), np.mean(acc_list))
+            l1.append(np.mean(loss_list))
+            l2.append(np.mean(acc_list))
             loss_list = []
             acc_list = []
-            LOG_INFO(msg)
+            # LOG_INFO(msg)
+    return np.mean(l1), np.mean(l2)
 
 
 def test_net(model, loss, inputs, labels, batch_size):
@@ -58,4 +63,5 @@ def test_net(model, loss, inputs, labels, batch_size):
         acc_list.append(acc_value)
 
     msg = '    Testing, total mean loss %.5f, total acc %.5f' % (np.mean(loss_list), np.mean(acc_list))
-    LOG_INFO(msg)
+    # LOG_INFO(msg)
+    return np.mean(loss_list), np.mean(acc_list)

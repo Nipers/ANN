@@ -24,3 +24,9 @@ class Network(object):
         for i in range(self.num_layers):
             if self.layer_list[i].trainable:
                 self.layer_list[i].update(config)
+    def __str__(self) -> str:
+        res = ""
+        for layer in self.layer_list:
+            res += str(layer)
+            res += "_"
+        return res

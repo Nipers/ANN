@@ -37,6 +37,8 @@ class Relu(Layer):
         grad_output[self._saved_tensor < 0] = 0
         return grad_output
         # TODO END
+    def __str__(self) -> str:
+        return "R"
 
 class Sigmoid(Layer):
     def __init__(self, name):
@@ -53,6 +55,9 @@ class Sigmoid(Layer):
         sig = self.forward(self._saved_tensor)
         return grad_output * sig * (1 - sig)
         # TODO END
+    def __str__(self) -> str:
+        return "S"
+	
 
 class Gelu(Layer):
 	def __init__(self, name):
@@ -62,7 +67,7 @@ class Gelu(Layer):
 		self._saved_tensor = input
 		u = np.power(2/np.pi, 0.5) * (input + 0.044715*(np.power(input, 3)))
 		return 0.5 * input *(1 + np.tanh(u))
-        # TODO END
+		# TODO END
 
 	def backward(self, grad_output):
 		x = np.power(self._saved_tensor, 3)
@@ -70,6 +75,9 @@ class Gelu(Layer):
 		b = 0.0535161 * x + 0.398942 * self._saved_tensor
 		sec = 2 / (np.exp(a) + np.exp(-a))
 		return grad_output * (0.5 * np.tanh(a) + b * np.power(sec, 2) + 0.5) 
+
+	def __str__(self) -> str:
+		return "G"
 
 class Linear(Layer):
     def __init__(self, name, in_num, out_num, init_std):
@@ -95,8 +103,8 @@ class Linear(Layer):
     def backward(self, grad_output):
         # TODO START
         '''Your codes here'''
-        self.grad_b = grad_output
-        self.grad_W = (self._saved_tensor.T @ grad_output) / grad_output.shape[0]
+        self.grad_b = -grad_output
+        self.grad_W = -self._saved_tensor.T @ grad_output / grad_output.shape[0]
         return grad_output @ self.W.T
         # TODO END
 
@@ -109,3 +117,6 @@ class Linear(Layer):
 
         self.diff_b = mm * self.diff_b + (self.grad_b + wd * self.b)
         self.b = self.b - lr * self.diff_b
+    	
+    def __str__(self) -> str:
+        return "L"
