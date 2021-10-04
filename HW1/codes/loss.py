@@ -11,6 +11,7 @@ class EuclideanLoss(object):
         # TODO START
         normed_diff = np.linalg.norm(target - input, axis = 1)
         return (np.power(normed_diff, 2)).mean(axis=0).sum() / 2.0
+        # TODO END
 
     def backward(self, input, target):
         # TODO START
@@ -43,24 +44,26 @@ class SoftmaxCrossEntropyLoss(object):
 
 
 class HingeLoss(object):
-	def __init__(self, name, margin=5):
-		self.name = name
-		self.margin = margin
+    def __init__(self, name, margin=5):
+        self.name = name
+        self.margin = margin
 
-	def forward(self, input, target):
+    def forward(self, input, target):
         # TODO START
-		return np.mean(np.sum((target == 0) * np.maximum(0, self.margin - input[target == 1].reshape(-1, 1) + input), axis=1))
+        hk = np.maximum(0, self.margin - input[target == 1].reshape(-1, 1) + input)
+        En = np.sum((target == 0) * hk, axis=1)
+        return np.mean(En)
         # TODO END
 
-	def backward(self, input, target):
+    def backward(self, input, target):
         # TODO START
-		'''Your codes here'''
-		grad = np.zeros_like(input)
-		grad[(target == 0) & (self.margin - input[target == 1].reshape(-1, 1) + input > 0)] = -1
-		grad[(target == 1)] = -np.sum(grad, axis=1)
-		return grad
-		# return grad / input.shape[0]
+        grad = np.zeros(input.shape, input.dtype)
+        # grad = np.zeros_like()
+        grad[(target == 0) & ((self.margin - input[target == 1].reshape(-1, 1) + input) > 0)] = -1
+        grad[target == 1] = -np.sum(grad, axis = 1)
+        return grad
+        # return grad / input.shape[0]
         # TODO END
 
-	def __str__(self) -> str:
-		return "H"
+    def __str__(self) -> str:
+        return "H"

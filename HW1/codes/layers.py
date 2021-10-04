@@ -64,17 +64,20 @@ class Gelu(Layer):
 		super(Gelu, self).__init__(name)
 
 	def forward(self, input):
+        # TODO START
 		self._saved_tensor = input
 		u = np.power(2/np.pi, 0.5) * (input + 0.044715*(np.power(input, 3)))
 		return 0.5 * input *(1 + np.tanh(u))
 		# TODO END
 
 	def backward(self, grad_output):
+        # TODO START
 		x = np.power(self._saved_tensor, 3)
 		a = 0.0356774 * x + 0.797885 * self._saved_tensor
 		b = 0.0535161 * x + 0.398942 * self._saved_tensor
 		sec = 2 / (np.exp(a) + np.exp(-a))
 		return grad_output * (0.5 * np.tanh(a) + b * np.power(sec, 2) + 0.5) 
+		# TODO END
 
 	def __str__(self) -> str:
 		return "G"
