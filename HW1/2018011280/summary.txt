@@ -1,14 +1,87 @@
 ########################
 # Additional Files
 ########################
+# T_L_G_L_S.png
+# T_0.02.png
+# L_S_L_H.png
+# L_R_L_S_L_E.png
+# T_L_R_L_S_L_H.png
+# T_L_R_L_R_L_S.png
+# L_R_L_G_L_E.png
+# 0.01.png
+# L_R_L_S.png
+# T_L_R_L_G_L_H.png
+# loss
+# L_R_L_R_L_E.png
+# 0.02.png
+# T_L_R_L_S_L_S.png
+# T_L_R_L_S.png
+# T_L_R_L_E.png
+# L_R_L_G_L_H.png
+# L_G_L_H.png
+# T_L_G_L_E.png
+# T_L_S_L_E.png
+# L_R_L_G_L_S.png
+# T_L_R_L_R_L_H.png
+# L_R_L_S_L_H.png
+# L_R_L_R_L_H.png
+# T_L_S_L_H.png
+# T_400.png
+# T_L_R_L_S_L_E.png
+# T_L_G_L_H.png
+# T_L_S_L_S.png
+# L_S_L_E.png
+# L_G_L_S.png
+# L_R_L_H.png
+# T_L_R_L_G_L_E.png
 # plot.py
-# data
-# readme.txt
+# T_L_R_L_G_L_S.png
+# accuracy
+# L_R_L_S_L_S.png
+# L_R_L_R_L_S.png
+# L_S_L_S.png
+# T_L_R_L_R_L_E.png
+# 400.png
+# L_R_L_E.png
+# T_0.01.png
+# T_L_R_L_H.png
+# L_G_L_E.png
 # __pycache__
+# data
 
 ########################
 # Filled Code
 ########################
+# ..\codes\loss.py:1
+        normed_diff = np.linalg.norm(target - input, axis = 1)
+        return (np.power(normed_diff, 2)).mean(axis=0).sum() / 2.0
+
+# ..\codes\loss.py:2
+        return target - input
+        # return (target - input) / input.shape[0]
+
+# ..\codes\loss.py:3
+        exp = np.exp(input - np.max(input))
+        self.soft = exp / np.expand_dims(np.sum(exp, 1),-1)
+        return -np.mean(np.log(self.soft) * target)
+
+# ..\codes\loss.py:4
+        return target - self.soft
+        # return (target - input) / input.shape[0]
+
+# ..\codes\loss.py:5
+        hk = np.maximum(0, self.margin - input[target == 1].reshape(-1, 1) + input)
+        En = np.sum((target == 0) * hk, axis=1)
+        return np.mean(En)
+
+# ..\codes\loss.py:6
+        grad = np.zeros(input.shape, input.dtype)
+        # grad = np.zeros_like()
+        grad[(target == 0) & ((self.margin - input[target == 1].reshape(-1, 1) + input) > 0)] = -1
+        grad[target == 1] = -np.sum(grad, axis = 1)
+        return grad
+        # return grad / input.shape[0]
+
 # ..\codes\layers.py:1
         self._saved_for_backward(input)
         return np.maximum(0, input)
@@ -46,36 +119,6 @@
         self.grad_W = -self._saved_tensor.T @ grad_output / grad_output.shape[0]
         return grad_output @ self.W.T
 
-# ..\codes\loss.py:1
-        normed_diff = np.linalg.norm(target - input, axis = 1)
-        return (np.power(normed_diff, 2)).mean(axis=0).sum() / 2.0
-
-# ..\codes\loss.py:2
-        return target - input
-        # return (target - input) / input.shape[0]
-
-# ..\codes\loss.py:3
-        exp = np.exp(input - np.max(input))
-        self.soft = exp / np.expand_dims(np.sum(exp, 1),-1)
-        return -np.mean(np.log(self.soft) * target)
-
-# ..\codes\loss.py:4
-        return target - self.soft
-        # return (target - input) / input.shape[0]
-
-# ..\codes\loss.py:5
-        hk = np.maximum(0, self.margin - input[target == 1].reshape(-1, 1) + input)
-        En = np.sum((target == 0) * hk, axis=1)
-        return np.mean(En)
-
-# ..\codes\loss.py:6
-        grad = np.zeros(input.shape, input.dtype)
-        # grad = np.zeros_like()
-        grad[(target == 0) & ((self.margin - input[target == 1].reshape(-1, 1) + input) > 0)] = -1
-        grad[target == 1] = -np.sum(grad, axis = 1)
-        return grad
-        # return grad / input.shape[0]
-
 
 ########################
 # References
@@ -84,36 +127,6 @@
 ########################
 # Other Modifications
 ########################
-# _codes\network.py -> ..\codes\network.py
-# 27 +     def __str__(self) -> str:
-# 28 +         res = ""
-# 29 +         for layer in self.layer_list:
-# 30 +             res += str(layer)
-# 31 +             res += "_"
-# 32 +         return res
-# _codes\layers.py -> ..\codes\layers.py
-# 40 +     def __str__(self) -> str:
-# 41 +         return "R"
-# 58 +     def __str__(self) -> str:
-# 59 +         return "S"
-# 60 +
-# 81 +
-# 82 +     def __str__(self) -> str:
-# 83 +         return "G"
-# 103 -
-# 123 +
-# 124 +     def __str__(self) -> str:
-# 125 +         return "L"
-# _codes\loss.py -> ..\codes\loss.py
-# 3 + from numpy.lib.function_base import diff
-# 21 +     def __str__(self) -> str:
-# 22 +         return "E"
-# 28 +         self.loss = np.zeros(1, dtype="f")
-# 42 +     def __str__(self) -> str:
-# 43 +         return "S"
-# 49 +         self.margin = margin
-# 68 +     def __str__(self) -> str:
-# 69 +         return "H"
 # _codes\solve_net.py -> ..\codes\solve_net.py
 # 20 +     l1 = []
 # 21 +     l2 = []
@@ -231,4 +244,34 @@
 # 96 +                 # file = open(fileName, "a")
 # 97 +                 # file.write(str(t) + "\n")
 # 98 +                 # file.close()
+# _codes\network.py -> ..\codes\network.py
+# 27 +     def __str__(self) -> str:
+# 28 +         res = ""
+# 29 +         for layer in self.layer_list:
+# 30 +             res += str(layer)
+# 31 +             res += "_"
+# 32 +         return res
+# _codes\loss.py -> ..\codes\loss.py
+# 3 + from numpy.lib.function_base import diff
+# 21 +     def __str__(self) -> str:
+# 22 +         return "E"
+# 28 +         self.loss = np.zeros(1, dtype="f")
+# 42 +     def __str__(self) -> str:
+# 43 +         return "S"
+# 49 +         self.margin = margin
+# 68 +     def __str__(self) -> str:
+# 69 +         return "H"
+# _codes\layers.py -> ..\codes\layers.py
+# 40 +     def __str__(self) -> str:
+# 41 +         return "R"
+# 58 +     def __str__(self) -> str:
+# 59 +         return "S"
+# 60 +
+# 81 +
+# 82 +     def __str__(self) -> str:
+# 83 +         return "G"
+# 103 -
+# 123 +
+# 124 +     def __str__(self) -> str:
+# 125 +         return "L"
 
