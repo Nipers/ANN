@@ -1,0 +1,310 @@
+########################
+# Additional Files
+########################
+# batches.meta
+
+########################
+# Filled Code
+########################
+# ..\codes\cnn\model.py:1
+    # Reference: https://github.com/pytorch/pytorch/blob/master/torch/nn/modules/batchnorm.py
+    # Reference: https://blog.csdn.net/qq_39208832/article/details/117930625?utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7ECTRLIST%7Edefault-1.no_search_link&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7ECTRLIST%7Edefault-1.no_search_link
+    def __init__(self, num_features, eps=1e-5, momentum=0.1):
+        self.eps = eps
+        self.momentum = momentum
+        self.weight = Parameter(torch.ones(num_features, requires_grad=True)) # initially the weight matrix is all one
+        self.bias = Parameter(torch.zeros(num_features, requires_grad=True)) # bias is zero
+        self.register_buffer('running_mean', torch.zeros(num_features))# average is zero
+        self.register_buffer('running_var', torch.zeros(num_features))#variance is one
+        mean = self.running_mean
+        var = self.running_var
+        if self.training:
+            mean = input.mean([0, 2, 3])
+            var = input.var([0, 2, 3], unbiased=False)
+            with torch.no_grad():# Update running_mean and running_var
+                self.running_mean = (1 - self.momentum) * self.running_mean + self.momentum * mean
+                self.running_var = (1 - self.momentum) * self.running_var + self.momentum * var
+        input = (input - mean[None, ..., None, None]) / torch.sqrt(var[None, ..., None, None] + self.eps)
+        input = input * self.weight[None, ..., None, None] + self.bias[None, ..., None, None]
+
+# ..\codes\cnn\model.py:2
+        # print(input.get_device())
+        keep_prob = 1 - self.p
+        batch_size, num_feature_map, height, width = input.shape
+        if self.training:
+            return (torch.rand((batch_size, 1, height, width)) < keep_prob).float().to(input.get_device()) * input  / keep_prob
+
+# ..\codes\cnn\model.py:3
+        kernel0 = 5
+        kernel1 = 3
+        channel0 = 100
+        channel1 = 50
+        if use_norm:
+            self.layers = nn.Sequential(
+                nn.Conv2d(in_channels=3, out_channels=channel0, kernel_size=kernel0),
+                BatchNorm2d(channel0),
+                nn.ReLU(),
+                Dropout(drop_rate),
+                nn.MaxPool2d(2),
+                nn.Conv2d(in_channels=channel0, out_channels=channel1, kernel_size=kernel1),
+                BatchNorm2d(channel1),
+                nn.ReLU(),
+                Dropout(drop_rate),
+                nn.MaxPool2d(2)
+            )
+        else:
+            self.layers = nn.Sequential(
+                nn.Conv2d(in_channels=3, out_channels=channel0, kernel_size=kernel0),
+                nn.ReLU(),
+                Dropout(drop_rate),
+                nn.MaxPool2d(2),
+                nn.Conv2d(in_channels=channel0, out_channels=channel1, kernel_size=kernel1),
+                nn.ReLU(),
+                Dropout(drop_rate),
+                nn.MaxPool2d(2)
+            )
+        outchannel = channel1*(((height + 1 - kernel0) // 2 + 1 - kernel1)//2) * (((weight + 1 - kernel0) // 2 + 1 - kernel1) // 2)
+        self.linear = nn.Linear(outchannel, 10)
+
+# ..\codes\cnn\model.py:4
+        logits = self.linear(self.layers(x).view(x.size(0), -1))
+        y = y.long()
+
+# ..\codes\mlp\model.py:1
+    def __init__(self, num_features, eps=1e-5, momentum=0.1):
+        self.eps = eps
+        self.momentum = momentum
+        # Parameters
+        self.weight = Parameter(torch.ones(num_features, requires_grad=True)) # initially the weight matrix is all one
+        self.bias = Parameter(torch.zeros(num_features, requires_grad=True)) # bias is zero
+        self.register_buffer('running_mean', torch.zeros(num_features))# average is zero
+        self.register_buffer('running_var', torch.zeros(num_features))#variance is one
+        batch_size = input.shape[0]
+        mean = self.running_mean
+        var = self.running_var
+        if self.training:
+            mean = torch.mean(input, dim=0)
+            var = torch.var(input, dim=0) * batch_size / (batch_size - 1)
+            with torch.no_grad():
+                self.running_mean = (1 - self.momentum) * self.running_mean + self.momentum * mean
+                self.running_var = (1 - self.momentum) * self.running_var + self.momentum * var
+        input = (input - mean) / (var + self.eps).sqrt()
+        input = self.weight * input + self.bias
+
+# ..\codes\mlp\model.py:2
+        keep_prob = 1 - self.p
+        if self.training:
+            return (torch.rand(input.shape) < keep_prob).float().to(input.get_device()) * input  / keep_prob
+
+# ..\codes\mlp\model.py:3
+        if use_norm:
+            self.layers = nn.Sequential(
+                nn.Linear(inputsize, hiddensize),
+                BatchNorm1d(hiddensize),
+                nn.ReLU(),
+                Dropout(drop_rate),
+                nn.Linear(hiddensize, 10),
+            )
+        else:
+            self.layers = nn.Sequential(
+                nn.Linear(inputsize, hiddensize),
+                nn.ReLU(),
+                Dropout(drop_rate),
+                nn.Linear(hiddensize, 10),
+            )
+
+# ..\codes\mlp\model.py:4
+        logits = self.layers(x)
+        y = y.long()
+
+
+########################
+# References
+########################
+# https://github.com/pytorch/pytorch/blob/master/torch/nn/modules/batchnorm.py
+# https://blog.csdn.net/qq_39208832/article/details/117930625?utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7ECTRLIST%7Edefault-1.no_search_link&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7ECTRLIST%7Edefault-1.no_search_link
+
+########################
+# Other Modifications
+########################
+# _codes\cnn\model.py -> ..\codes\cnn\model.py
+# 3 + from numpy.core.fromnumeric import mean
+# 5 - from torch.nn import init
+# 40 -     def __init__(self, drop_rate=0.5):
+# 58 +     def __init__(self, drop_rate=0.5, use_norm=True, height=32, weight=32):
+# 52 -
+# _codes\cnn\main.py -> ..\codes\cnn\main.py
+# 17 - parser.add_argument('--batch_size', type=int, default=100,
+# 17 ?                                                          ^
+# 17 + parser.add_argument('--batch_size', type=int, default=100)
+# 17 ?                                                          ^
+# 18 -     help='Batch size for mini-batch training and evaluating. Default: 100')
+# 19 - parser.add_argument('--num_epochs', type=int, default=20,
+# 19 ?                                                       ^ ^
+# 18 + parser.add_argument('--num_epochs', type=int, default=50)
+# 18 ?                                                       ^ ^
+# 20 -     help='Number of training epoch. Default: 20')
+# 21 - parser.add_argument('--learning_rate', type=float, default=1e-3,
+# 21 ?                                                            ^  ^^
+# 19 + parser.add_argument('--learning_rate', type=float, default=8e-4)
+# 19 ?                                                            ^  ^^
+# 22 -     help='Learning rate during optimization. Default: 1e-3')
+# 23 - parser.add_argument('--drop_rate', type=float, default=0.5,
+# 23 ?                                                          ^^
+# 20 + parser.add_argument('--drop_rate', type=float, default=0.4)
+# 20 ?                                                          ^^
+# 24 -     help='Drop rate of the Dropout Layer. Default: 0.5')
+# 25 - parser.add_argument('--is_train', type=bool, default=True,
+# 25 ?                                                          ^
+# 21 + parser.add_argument('--is_train', type=bool, default=True)
+# 21 ?                                                          ^
+# 26 -     help='True to train and False to inference. Default: True')
+# 27 - parser.add_argument('--data_dir', type=str, default='../cifar-10_data',
+# 27 ?                                                         -------------
+# 22 + parser.add_argument('--data_dir', type=str, default='../',
+# 28 -     help='Data directory. Default: ../cifar-10_data')
+# 28 ?                                       -------------
+# 23 +     help='Data directory. Default: ../')
+# 108 -         cnn_model = Model(drop_rate=args.drop_rate)
+# 108 ?                                     ^^^^^^^^^^^^^^
+# 103 +         cnn_model = Model(drop_rate=0)
+# 103 ?                                     ^
+# 114 +         best_test_acc = 0.0
+# 115 +         best = 0
+# 132 +             if test_acc > best_test_acc:
+# 133 +                 best = epoch
+# 134 +                 best_test_acc = test_acc
+# 137 -             print("  learning rate:                 " + str(optimizer.param_groups[0]['lr']))
+# 137 +             # print("  learning rate:                 " + str(optimizer.param_groups[0]['lr']))
+# 137 ?            ++
+# 138 -             print("  training loss:                 " + str(train_loss))
+# 138 +             # print("  training loss:                 " + str(train_loss))
+# 138 ?            ++
+# 139 -             print("  training accuracy:             " + str(train_acc))
+# 139 +             # print("  training accuracy:             " + str(train_acc))
+# 139 ?            ++
+# 140 -             print("  validation loss:               " + str(val_loss))
+# 140 +             # print("  validation loss:               " + str(val_loss))
+# 140 ?            ++
+# 141 -             print("  validation accuracy:           " + str(val_acc))
+# 141 +             # print("  validation accuracy:           " + str(val_acc))
+# 141 ?            ++
+# 142 -             print("  best epoch:                    " + str(best_epoch))
+# 142 +             # print("  best epoch:                    " + str(best_epoch))
+# 142 ?            ++
+# 143 -             print("  best validation accuracy:      " + str(best_val_acc))
+# 143 +             # print("  best validation accuracy:      " + str(best_val_acc))
+# 143 ?            ++
+# 144 -             print("  test loss:                     " + str(test_loss))
+# 144 +             # print("  test loss:                     " + str(test_loss))
+# 144 ?            ++
+# 145 -             print("  test accuracy:                 " + str(test_acc))
+# 145 +             # print("  test accuracy:                 " + str(test_acc))
+# 145 ?            ++
+# 146 -
+# 146 +             if epoch == args.num_epochs:
+# 147 +                 # file = open("testACC.txt", "a")
+# 148 +                 # file.write(str(args.drop_rate) + ": " + str(best_test_acc) + "\n")
+# 149 +                 # file.close()
+# 150 +                 print(best_test_acc)
+# 151 +                 print(best)
+# 152 +             file = open("t_loss_D.txt", "a")
+# 153 +             file.write(str(train_loss) + "\n")
+# 154 +             file.close()
+# 155 +             file = open("v_loss_D.txt", "a")
+# 156 +             file.write(str(val_loss) + "\n")
+# 157 +             file.close()
+# 158 +             file = open("t_acc_D.txt", "a")
+# 159 +             file.write(str(train_acc) + "\n")
+# 160 +             file.close()
+# 161 +             file = open("v_acc_D.txt", "a")
+# 162 +             file.write(str(val_acc) + "\n")
+# 163 +             file.close()
+# _codes\mlp\model.py -> ..\codes\mlp\model.py
+# 40 -     def __init__(self, drop_rate=0.5):
+# 56 +     def __init__(self, drop_rate=0.5, use_norm=True, inputsize = 32 * 32 * 3, hiddensize = 200):
+# _codes\mlp\main.py -> ..\codes\mlp\main.py
+# 17 - parser.add_argument('--batch_size', type=int, default=100,
+# 17 ?                                                          ^
+# 17 + parser.add_argument('--batch_size', type=int, default=100)
+# 17 ?                                                          ^
+# 18 -     help='Batch size for mini-batch training and evaluating. Default: 100')
+# 19 - parser.add_argument('--num_epochs', type=int, default=20,
+# 19 ?                                                       ^ ^
+# 18 + parser.add_argument('--num_epochs', type=int, default=50)
+# 18 ?                                                       ^ ^
+# 20 -     help='Number of training epoch. Default: 20')
+# 21 - parser.add_argument('--learning_rate', type=float, default=1e-3,
+# 21 ?                                                                ^
+# 19 + parser.add_argument('--learning_rate', type=float, default=1e-3)
+# 19 ?                                                                ^
+# 22 -     help='Learning rate during optimization. Default: 1e-3')
+# 23 - parser.add_argument('--drop_rate', type=float, default=0.5,
+# 23 ?                                                          ^^
+# 20 + parser.add_argument('--drop_rate', type=float, default=0.3)
+# 20 ?                                                          ^^
+# 24 -     help='Drop rate of the Dropout Layer. Default: 0.5')
+# 25 - parser.add_argument('--is_train', type=bool, default=True,
+# 25 ?                                                          ^
+# 21 + parser.add_argument('--is_train', type=bool, default=True)
+# 21 ?                                                          ^
+# 26 -     help='True to train and False to inference. Default: True')
+# 27 - parser.add_argument('--data_dir', type=str, default='../cifar-10_data',
+# 27 ?                                                         -------------
+# 22 + parser.add_argument('--data_dir', type=str, default='../',
+# 28 -     help='Data directory. Default: ../cifar-10_data')
+# 28 ?                                       -------------
+# 23 +     help='Data directory. Default: ../')
+# 108 -         mlp_model = Model(drop_rate=drop_rate)
+# 108 ?                                     ^^^^^^^^^
+# 103 +         mlp_model = Model(drop_rate=0)
+# 103 ?                                     ^
+# 114 +         best_test_acc = 0.0
+# 134 -
+# 130 +             if test_acc > best_test_acc:
+# 131 +                 best_test_acc = test_acc
+# 137 -             print("  learning rate:                 " + str(optimizer.param_groups[0]['lr']))
+# 134 +             # print("  learning rate:                 " + str(optimizer.param_groups[0]['lr']))
+# 134 ?            ++
+# 138 -             print("  training loss:                 " + str(train_loss))
+# 135 +             # print("  training loss:                 " + str(train_loss))
+# 135 ?            ++
+# 139 -             print("  training accuracy:             " + str(train_acc))
+# 136 +             # print("  training accuracy:             " + str(train_acc))
+# 136 ?            ++
+# 140 -             print("  validation loss:               " + str(val_loss))
+# 137 +             # print("  validation loss:               " + str(val_loss))
+# 137 ?            ++
+# 141 -             print("  validation accuracy:           " + str(val_acc))
+# 138 +             # print("  validation accuracy:           " + str(val_acc))
+# 138 ?            ++
+# 142 -             print("  best epoch:                    " + str(best_epoch))
+# 139 +             # print("  best epoch:                    " + str(best_epoch))
+# 139 ?            ++
+# 143 -             print("  best validation accuracy:      " + str(best_val_acc))
+# 140 +             # print("  best validation accuracy:      " + str(best_val_acc))
+# 140 ?            ++
+# 144 -             print("  test loss:                     " + str(test_loss))
+# 141 +             # print("  test loss:                     " + str(test_loss))
+# 141 ?            ++
+# 145 -             print("  test accuracy:                 " + str(test_acc))
+# 142 +             # print("  test accuracy:                 " + str(test_acc))
+# 142 ?            ++
+# 146 -
+# 143 +             file = open("t_loss_D.txt", "a")
+# 144 +             file.write(str(train_loss) + "\n")
+# 145 +             file.close()
+# 146 +             file = open("v_loss_D.txt", "a")
+# 147 +             file.write(str(val_loss) + "\n")
+# 148 +             file.close()
+# 149 +             file = open("t_acc_D.txt", "a")
+# 150 +             file.write(str(train_acc) + "\n")
+# 151 +             file.close()
+# 152 +             file = open("v_acc_D.txt", "a")
+# 153 +             file.write(str(val_acc) + "\n")
+# 154 +             file.close()
+# 155 +             # if epoch == args.num_epochs:
+# 156 +             # 	file = open("testACC.txt", "a")
+# 157 +             # 	file.write(str(args.drop_rate) + ": " + str(best_test_acc) + "\n")
+# 158 +             # 	file.close()
+
